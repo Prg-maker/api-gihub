@@ -1,70 +1,33 @@
 import style from './App.module.scss'
-import {
-  Switch
-} from '@mui/material'
 
-import { useState } from 'react'
-import axios from 'axios'
+
+import GlobalStyle from './global'
+import {ThemeProvider} from 'styled-components'
+import light from './styles/themes/light' 
+import dark from './styles/themes/dark' 
+import { Header } from './components/Header'
+import { Main } from './components/Main'
+
+import usePersistedState from './utils/usePersistedState'
+
 
 function App() {
 
-  const [username , setUsername] = useState('')
-  const [repository , setRepository] = useState([])
-  const [user , setUser] = useState([])
 
-  async function handleClick(event){
-    event.preventDefault()
+  const [theme , setTheme] = usePersistedState('theme', light)
 
-    const response = await axios.get(`https://api.github.com/users/${username}/repos?per_page=10`)
-    const responseUser = await axios.get(`https://api.github.com/users/${username}`)
-    setUser([responseUser.data])
-    setRepository(response.data)
-
+  const toggleTheme = () => {
+    setTheme(theme.title == 'light'  ? dark  : light ) 
   }
-  console.log(user)
 
   return (
-
-    <div className={style.AppWrapperContainer}>
-      <header>
-        <h2 className={style.textGithub}>Github Profiles</h2>
-        <Switch defaultChecked />
-      </header>
-      <main>
-
-        <form action="">
-          <input 
-            className={style.inputName} 
-            type="text" 
-            placeholder='Github Username'
-            onChange={value => setUsername(value.target.value)}
-            value={username}
-          />
-          
-          <button onClick={handleClick}>Search</button>
-        </form>
-         <div className={style.repos}>
-           {
-             user.map(data => {
-               return(
-                 <img src={data.avatar_url} alt="" />
-               )
-             })
-           }
-          <ul>
-              {
-                
-                repository.map(repo => {
-                  return (
-                    <li key={repo.id} className={style.repo}>{repo.name}</li>
-                  )
-                })
-              }
-          </ul>
-        </div>
-      </main>
-     
-    </div>
+    <ThemeProvider theme={theme}>
+      <GlobalStyle/>
+      <div className={style .AppWrapperContainer}>
+        <Header  toggleTheme={toggleTheme}/>
+        <Main/>
+      </div>
+    </ThemeProvider>
   )
 }
 
